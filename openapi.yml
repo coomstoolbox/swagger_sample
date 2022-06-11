@@ -1,6 +1,175 @@
 openapi: 3.0.0
 info:
   title: "Test swui"
-  version: "1.0.0"
   description: "A sample API examples."
-paths: {}
+  version: "1.0.0"
+servers:
+- url: https://development-server.com/
+  description: Development server
+- url: https://staging-server.com/
+  description: Staging server
+- url: https://api.origin-server.com/
+  description: Production server
+paths:
+  /subscribe-api:
+      post:
+        tags:
+          - common
+        summary: API利用登録
+        description: 利用のための登録を行います。登録にはコンソールアクセスのための管理者アカウントおよびパスワードが必要です。
+        requestBody:
+          description: 認証情報が必要です。
+          required: true
+          content:
+            application/json:
+              schema:
+                properties:
+                  account:
+                   description: 管理者のアカウント
+                   type: string
+                  password:
+                   description: 管理者のパスワード
+                   type: string
+        responses:
+          200:
+            description: OK
+            content:
+              application/json:
+                schema:
+                  properties:
+                    subscriberkey:
+                     description: APIアクセスの加入者キー
+                     type: string
+                    consoleurl:
+                     description: APIアクセス先となるコンソールURL
+                     type: string
+                    consoleapikey:
+                     description: APIアクセスに必要なコンソールAPIキー
+                     type: string
+  /api/booklist:
+      post:
+        tags:
+          - book
+        summary: 本の一覧取得
+        description: 検索された本の一覧を返します。
+        requestBody:
+          description: 検索を行う年月日を指定します。
+          required: true
+          content:
+            application/json:
+              schema:
+                properties:
+                  subscriberkey:
+                   description: 加入者キー
+                   type: string
+                  year:
+                   description: 検索 - 年
+                   type: string
+                  month:
+                   description: 検索 - 月
+                   type: string
+                  day:
+                   description: 検索 - 日
+                   type: string
+        responses:
+          201:
+            description: OK
+            content:
+              application/json:
+                schema:
+                  properties:
+                    books:
+                     description: 検索された本の一覧
+                     type: array
+                     items: {
+                      $ref: "#/components/schemas/bookinfo"
+                     }
+  /api/downloadbook:
+      post:
+        tags:
+          - book
+        summary: 本のダウンロード
+        description: 検索された本をダウンロードします。
+        requestBody:
+          description: 取得を行う本と年月日を指定します。
+          required: true
+          content:
+            application/json:
+              schema:
+                properties:
+                  subscriberkey:
+                   description: 加入者キー
+                   type: string
+                  year:
+                   description: 検索 - 年
+                   type: string
+                  month:
+                   description: 検索 - 月
+                   type: string
+                  day:
+                   description: 検索 - 日
+                   type: string
+                  name:
+                    description: 名前
+                    type: string
+        responses:
+          303:
+            description: ダウンロードURLへのリダイレクト
+            headers:
+              Location:
+                schema:
+                  type: "string"
+                description: ダウンロードURL
+            content:
+              application/gzip: {}
+  /api/booklist/{subscriberkey}:
+      post:
+        tags:
+          - old-style
+        summary: 本の一覧取得
+        description: 検索された本の一覧を返します。
+        parameters:
+          - name: subscriberkey
+            in: path
+            description: 加入者キー
+            required: true
+            schema:
+             type: string
+        requestBody:
+          description: 検索を行う年月日を指定します。
+          required: true
+          content:
+            text/plain; charset=utf-8:
+              schema:
+                type: string
+                example: |
+                  YEAR=2022
+                  MONTH=9
+                  DAY=1
+        responses:
+          200:
+            description: OK
+            content:
+              application/json:
+                schema:
+                  properties:
+                    books:
+                     description: 検索された本の一覧
+                     type: array
+                     items: {
+                      $ref: "#/components/schemas/bookinfo"
+                     }
+components:
+  schemas:
+    bookinfo:
+      title: 本情報
+      type: object
+      description: 本の情報が含まれています
+      properties:
+        name:
+          description: 名前
+          type: string
+        size:
+          description: ページ
+          type: integer
+          format: int64
