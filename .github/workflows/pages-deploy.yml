@@ -20,13 +20,13 @@ jobs:
         run: npm install -g swagger-cli
 
       - name: Validate Swagger Files 👓
-        run: swagger-cli validate -d openapi.yaml --type yaml
+        run: swagger-cli validate -d openapi.yml --type yaml
 
       - name: Generate Swagger UI 🔨
         uses: Legion2/swagger-ui-action@v1
         with:
           output: swagger-ui
-          spec-file: openapi.yaml
+          spec-file: openapi.yml
 
       - name: Deploy to GitHub Pages ☁
         uses: peaceiris/actions-gh-pages@v3
